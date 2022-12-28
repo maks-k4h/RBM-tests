@@ -116,12 +116,12 @@ class RBM:
 
         return x_tilda
 
-    def fit(self, X: np.ndarray, epochs=10, batch_size=16, gibb_samples=1, lr=1e-3, wd=1e-5):
+    def fit(self, X: np.ndarray, epochs=10, batch_size=16, gibb_samples=1, lr=1e-3, wd=1e-5, persistence=False, momentum=0.8):
         """
         Makes the model to give high probabilities to samples from the distribution
         of train data and low to those that are not.
 
-        Warning: X is shuffled.
+        Warning: X is shuffled, if persistence is set — changed.
 
         :param X: train data,
         :param epochs: the number of epochs
@@ -129,11 +129,18 @@ class RBM:
         :param gibb_samples: the number of Gibb samples per training sample
         :param lr: learning rate
         :param wd: weight decay
+        :param persistence: use Persistence Contrastive Divergence
+        :param momentum: momentum coefficient
         :return:
         """
 
         N = X.shape[0]
         batch_size = min(N, batch_size)
+
+        # moments
+        Bv_m = np.zeros_like(self.Bv)
+        Bh_m = np.zeros_like(self.Bh)
+        W_m = np.zeros_like(self.W)
 
         for epoch in range(epochs):
             np.random.shuffle(X)
@@ -146,7 +153,7 @@ class RBM:
                 grad_Bh = np.zeros_like(self.Bh)
                 grad_W = np.zeros_like(self.W)
 
-                for x in batch:
+                for i, x in enumerate(batch):
 
                     # performing gibb sampling
                     x_tilda = self.gibb_sample(x, gibb_samples)
@@ -156,15 +163,25 @@ class RBM:
                     grad_Bh += self.sample_h(x) - self.sample_h(x_tilda)
                     grad_W += np.outer(self.sample_h(x), x) - np.outer(self.sample_h(x_tilda), x_tilda)
 
+                    if persistence:
+                        X[bn*batch_size + i] = x_tilda
+
                 # averaging the gradients
                 grad_Bv /= batch_size
                 grad_Bh /= batch_size
                 grad_W /= batch_size
 
+                # moments
+                Bv_m = (1-momentum) * grad_Bv + momentum * Bv_m
+                Bh_m = (1-momentum) * grad_Bh + momentum * Bh_m
+                W_m = (1-momentum) * grad_W + momentum * W_m
+
                 # updating weights
-                self.Bv += lr * grad_Bv - wd * self.Bv
-                self.Bh += lr * grad_Bh - wd * self.Bh
+                self.Bv += lr * Bv_m - wd * self.Bv
+                self.Bh += lr * Bh_m - wd * self.Bh
                 self.W += lr * grad_W - wd * self.W
+
+
 
 
 
