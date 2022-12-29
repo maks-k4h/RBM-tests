@@ -1,0 +1,101 @@
+Notes on mnist-test models' hyperparameters tuning. Quite outdated — real valued data was put with no prior binarization
+ that is required for current implementation of RBM. Now that the ability to automatically sample binary vectors was
+ added and used error rates upon same hyperparametes have changed though not much.
+
+Hidden units: 10
+Weight decay: 5e-5
+Batch size: 16
+    No persistance
+        Learning rate: 1e-3
+            Momentum: 0.8
+                10 epochs
+                    0.3345
+                    0.3021
+            Momentum: 0.9
+                10 epochs
+                    0.306
+                    0.3113
+            Momentum: 0.99
+                10 epochs
+                    0.306
+                    0.3113
+
+        Learning rate: 1e-2
+            Momentum: 0.8
+                10 epochs
+                    0.6249
+                    0.7102
+                    0.6936
+                    0.6936 --> Learning rate: 1e-3, Gibb samples: 5
+                        15 epochs
+                            0.6953 --> Learning rate: 1e-4, momentum: .99
+                                20 epochs
+                                    0.6997
+                    0.6725 --> Learning rate: 1e-4, Gibb samples: 5, momentum: .99
+                        20 epochs
+                            0.6745 -> learning rate: 1e-5, batch size: 128, weight decay: 1e-6
+                                30 epochs
+                                    0.6741 --> weight decay: 1e-4
+                                        35 epochs
+                                            0.6789 --> weight decay: 1e-3
+                                                40 epochs
+                                                    0.56
+
+        Learning rate: 5e-2
+            Momentum: 0.8
+                10 epochs
+                    0.6869 --> Learning rate: 1e-3
+                        20 epochs
+                            0.68 --> Learning rate: 1e-4
+                                30 epochs
+                                    0.6985
+                    0.7143
+
+        Learning rate: 1e-1
+            Momentum: 0.8
+                10 epochs
+                    0.713 --> Learning rate: 1e-3, Gibb samples: 5, batch size: 64
+                        30 epochs
+                            0.7169 -> batch size: 16
+                                40 epochs
+                                    0.735 -> Learning rate: 1e-4, Gibb samples: 10
+                                        52 epochs
+                                            0.728
+                                        70-75 epochs
+                                            0.748
+
+    Persistance
+        Learning rate: 1e-2
+            Momentum: 0.8
+                10 epochs
+                    0.312 --> Momentum 0.99, learning rate: 1e-4, reset persistance
+                        15 epochs
+                            0.3231
+
+Hidden unith: 100
+Persistence:  off
+Epochs:  5
+Batch size:  16
+Weight decay:  1e-05
+Gibb samples:  1
+    Momentum:  0.95
+        Learning rate:  1e-2
+            5 epochs
+                0.901
+                0.9064
+            10 epochs
+                0.9213
+                    --> Learning rate: 1e-3
+                        15 epochs
+                            0.9213
+                    --> Learning rate: 1e-3, batch size: 64
+                        15 epochs
+                            0.921
+                    --> Learning rate: 1e-3, weight decay: 1e-6, Gibb sampling: 5
+                        15 epochs
+                            0.9208
+                    --> Learning rate: 1e-4
+                        15 epochs
+                            0.9189
+            15 epochs
+                0.9238
